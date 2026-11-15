@@ -1,0 +1,9 @@
+# Environment secrets and local overrides
+.env
+.env.*
+!.env.example
+
+# Apprise runtime state and configuration files containing bot tokens
+apprise/*
+!apprise/.gitkeep
+!apprise/*.example

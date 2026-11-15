@@ -1,0 +1,56 @@
+services:
+  apprise:
+    image: ${APPRISE_IMAGE:-caronc/apprise:2.1.0}
+    container_name: apprise
+    restart: unless-stopped
+    environment:
+      # Stores each config key directly as /config/<key>.yml (or .cfg)
+      APPRISE_STATEFUL_MODE: simple
+      APPRISE_DEFAULT_FORMAT: text
+      APPRISE_WORKER_COUNT: 1
+      TZ: ${TZ:-Etc/UTC}
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+    volumes:
+      - ./apprise:/config
+    # Intentionally NOT publishing port 8000: apprise-api has no authentication
+    # by default and stores your Zalo bot token. Dockhand talks to http://apprise:8000
+    # over the shared Docker network.
+    #
+    # For temporary local setup/debugging only, uncomment:
+    # ports:
+    #   - "127.0.0.1:8000:8000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:8000/status || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - dockhand
+
+  zalo-watcher:
+    image: ${APPRISE_IMAGE:-caronc/apprise:2.1.0}
+    container_name: zalo-watcher
+    restart: unless-stopped
+    user: "${PUID:-1000}:${PGID:-1000}"
+    entrypoint: ["python3", "-u", "/watcher/zalo_watcher.py"]
+    stop_grace_period: 3s
+    environment:
+      TZ: ${TZ:-Etc/UTC}
+      APPRISE_CONFIG_FILE: /config/dockhand.yml
+      ZALO_BOT_TOKEN: ${ZALO_BOT_TOKEN:-}
+      ZALO_SUBSCRIBE_PASSCODE: ${ZALO_SUBSCRIBE_PASSCODE:-}
+      ZALO_AUTO_SUBSCRIBE: ${ZALO_AUTO_SUBSCRIBE:-false}
+      ZALO_POLL_TIMEOUT: ${ZALO_POLL_TIMEOUT:-25}
+      ZALO_SEND_WELCOME: ${ZALO_SEND_WELCOME:-true}
+    volumes:
+      - ./watcher:/watcher:ro
+      - ./apprise:/config
+    networks:
+      - dockhand
+
+networks:
+  dockhand:
+    external: true
+    name: ${DOCKHAND_NETWORK:-dockhand_default}

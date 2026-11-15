@@ -1,0 +1,21 @@
+# Copy this file to apprise/dockhand.yml and replace <BOT_TOKEN> and <CHAT_ID>.
+# Keep apprise/dockhand.yml out of git (it is ignored by .gitignore).
+#
+# In Dockhand (Settings -> Notifications -> Add -> Apprise/Webhook):
+#   - Plain text (default): apprise://apprise:8000/dockhand
+#   - Markdown formatting:  apprise://apprise:8000/dockhand?format=markdown
+#
+# Leave out ?format=... on the zalo:// URL below so Dockhand controls whether each
+# channel sends plain text or Markdown.
+
+urls:
+  - zalo://<BOT_TOKEN>/<CHAT_ID>
+
+# Optional examples:
+#
+# Notify multiple Zalo users/groups at once:
+#   - zalo://<BOT_TOKEN>/<CHAT_ID_1>/<CHAT_ID_2>
+#
+# Route by tag (e.g. Dockhand URL: apprise://apprise:8000/dockhand?tag=ops&format=markdown):
+#   - zalo://<BOT_TOKEN>/<OPS_CHAT_ID>:
+#       tag: ops
